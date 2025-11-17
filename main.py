@@ -1,8 +1,10 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr
+from typing import Dict
 
-app = FastAPI()
+app = FastAPI(title="FB Ad Accounts Rental API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -12,6 +14,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class ContactPayload(BaseModel):
+    name: str
+    email: EmailStr
+    message: str | None = None
+
 @app.get("/")
 def read_root():
     return {"message": "Hello from FastAPI Backend!"}
@@ -19,6 +26,12 @@ def read_root():
 @app.get("/api/hello")
 def hello():
     return {"message": "Hello from the backend API!"}
+
+@app.post("/contact")
+def contact(payload: ContactPayload) -> Dict[str, str]:
+    # In a real system you might send an email or store to DB.
+    # We simply acknowledge receipt for now.
+    return {"status": "ok", "message": f"Thanks {payload.name}, we'll get back to you at {payload.email}"}
 
 @app.get("/test")
 def test_database():
